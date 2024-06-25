@@ -1,8 +1,6 @@
 //
 // Nirja Basawa
-// nbasawa
-// UCSC CSE130
-// Assignment 3
+// 05/21/24
 //
 
 #include "queue.h"
