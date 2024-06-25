@@ -1,18 +1,11 @@
 //
 // Nirja Basawa
-// nbasawa
-// UCSC CSE130
-// Assignment 3
+// 05/21/24
 //
 
 #include "rwlock.h"
 #include <pthread.h>
 #include <stdlib.h>
-//#include <stdbool.h>
-
-// helper funcs declaration
-//bool writeShouldWait(rwlock_t *rw);
-//bool readShouldWait(rwlock_t *rw);
 
 
 // define rwlock struct
@@ -23,7 +16,6 @@ struct rwlock {
     int readers;
     int writers;
     int waiting_writers;
-    //int waiting_readers;
     PRIORITY priority;
     uint32_t n;
 };
@@ -42,7 +34,6 @@ rwlock_t* rwlock_new(PRIORITY p, uint32_t n) {
     rwlock->readers = 0;
     rwlock->writers = 0;
     rwlock->waiting_writers = 0;
-    //rwlock->waiting_readers = 0;
     rwlock->priority = p;
     rwlock->n = n;
 
@@ -68,19 +59,13 @@ void rwlock_delete(rwlock_t **l) {
 void reader_lock(rwlock_t *rw) {
     // lock mutex
     pthread_mutex_lock(&rw->mutex);
-    //rw->waiting_readers++;
-
-    // change to readWaits
-    /*while (readShouldWait(rw)) {
-        pthread_cond_wait(&rw->readers_cond, &rw->mutex);
-    }*/
+   
     if (rw->priority == READERS || (rw->priority == N_WAY && rw->writers == 0)) {
-        while (rw->waiting_writers > 0) { // comment waiting out?
+        while (rw->waiting_writers > 0) { // wait until there are no waiting writers for N-WAY
             pthread_cond_wait(&rw->readers_cond, &rw->mutex);
         }
     }
 
-    //rw->waiting_readers--;
     rw->readers++;
     // unlock mutex
     pthread_mutex_unlock(&rw->mutex);
@@ -103,9 +88,6 @@ void writer_lock(rwlock_t *rw) {
     pthread_mutex_lock(&rw->mutex);
     rw->waiting_writers++;
 
-    /*while (writeShouldWait(rw)) {
-        pthread_cond_wait(&rw->writers_cond, &rw->mutex);
-    }*/
     if (rw->priority == WRITERS
         || (rw->priority == N_WAY && rw->readers == 0 && rw->writers == 0)) {
         while (rw->readers > 0 || rw->writers > 0) {
@@ -136,7 +118,7 @@ void writer_unlock(rwlock_t *rw) {
 // writeWaits()
 // write should wait if active read or active write
 // if N_WAY - write should wait until n reads
-bool writeShouldWait(rwlock_t *rw) {
+bool writeWaits(rwlock_t *rw) {
     //if (rw->priority)
     // For any priority, there shouldn't be any active reader/writer
     if (rw->writers > 0 || rw->readers > 0) {
@@ -161,7 +143,7 @@ bool writeShouldWait(rwlock_t *rw) {
 
 // readWaits()
 // read should wait if active / waiting writers
-bool readShouldWait(rwlock_t *rw) {
+bool readWaits(rwlock_t *rw) {
     if (rw->priority == READERS) {
         return (rw->writers > 0);
     }
