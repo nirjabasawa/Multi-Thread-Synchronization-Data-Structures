@@ -1,64 +1,33 @@
-/**
- * @File rwlock.h
- *
- * The header file that you need to implement for assignment 3.
- *
- * @author Andrew Quinn, Mitchell Elliott, and Gurpreet Dhillon.
- */
+//
+// Nirja Basawa
+// 05/21/24
+// rwlock.h
+//
 
 #pragma once
 
 #include <stdint.h>
 
-/** @struct rwlock_t
- *
- *  @brief This typedef renames the struct rwlock.  Your `c` file
- *  should define the variables that you need for your reader/writer
- *  lock.
- */
+// create rwlock type struct
 typedef struct rwlock rwlock_t;
 
+// define levels of priority
 typedef enum { READERS, WRITERS, N_WAY } PRIORITY;
 
-/** @brief Dynamically allocates and initializes a new rwlock with
- *         priority p, and, if using N_WAY priority, n.
- *
- *  @param The priority of the rwlock
- *
- *  @param The n value, if using N_WAY priority
- *
- *  @return a pointer to a new rwlock_t
- */
-
+// create new rwlock, dynamically allocate memory with PRIORITY p and n for N-WAY priority if needed
 rwlock_t *rwlock_new(PRIORITY p, uint32_t n);
 
-/** @brief Delete your rwlock and free all of its memory.
- *
- *  @param rw the rwlock to be deleted.  Note, you should assign the
- *  passed in pointer to NULL when returning (i.e., you should set *rw
- *  = NULL after deallocation).
- *
- */
+// delete rwlock and free memory
 void rwlock_delete(rwlock_t **rw);
 
-/** @brief acquire rw for reading
- *
- */
+// check and allow the thread to acquire the rwlock rw for reading
 void reader_lock(rwlock_t *rw);
 
-/** @brief release rw for reading--you can assume that the thread
- * releasing the lock has *already* acquired it for reading.
- *
- */
+// allow the thread to release rwlock rw for reading
 void reader_unlock(rwlock_t *rw);
 
-/** @brief acquire rw for writing
- *
- */
+// check and allow the thread to acquire the rwlock rw for writing
 void writer_lock(rwlock_t *rw);
 
-/** @brief release rw for writing--you can assume that the thread
- * releasing the lock has *already* acquired it for writing.
- *
- */
+// allow the thread to release rwlock rw for writing
 void writer_unlock(rwlock_t *rw);
